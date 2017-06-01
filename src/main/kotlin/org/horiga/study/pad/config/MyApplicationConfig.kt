@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import jetbrains.exodus.env.Environment
+import jetbrains.exodus.env.Environments
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.horiga.study.pad.repository.EventRepository
@@ -58,12 +58,8 @@ open class MyApplicationConfig(val properties: MyApplicationProperties) {
         return eventFetcher
     }
 
-//    @Bean(destroyMethod = "shutdown")
-//    fun eventRepository() : EventRepository {
-//
-//        val env = Environment("")
-//
-//        return EventRepository(env)
-//
-//    }
+    @Bean(destroyMethod = "shutdown")
+    fun eventRepository() : EventRepository {
+        return EventRepository(Environments.newInstance(properties.dbPath))
+    }
 }
