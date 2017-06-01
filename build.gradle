@@ -45,6 +45,7 @@ dependencies {
     compile("com.fasterxml.jackson.module:jackson-module-afterburner")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     compile("io.github.microutils:kotlin-logging:1.4.4")
+    compile("org.jetbrains.xodus:xodus-openAPI:1.0.5")
 
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
     compileOnly('org.projectlombok:lombok')

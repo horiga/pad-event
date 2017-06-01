@@ -12,6 +12,8 @@ open class MyApplicationProperties {
     var notifyToken = ""
     val fetchIntervalMinutes = 10
 
+    val dbPath = "/var/xodus/pd/.events.db"
+
     @NestedConfigurationProperty
     var http: HttpProperties = HttpProperties()
 

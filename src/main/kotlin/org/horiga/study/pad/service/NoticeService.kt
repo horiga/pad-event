@@ -10,5 +10,6 @@ open class NoticeService(
 
     companion object: KLogging()
 
-    fun sendNotify() {}
+    fun sendNotify() {
+    }
 }
