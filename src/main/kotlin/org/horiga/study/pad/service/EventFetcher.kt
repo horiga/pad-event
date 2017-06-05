@@ -1,9 +1,11 @@
 package org.horiga.study.pad.service
 
+import com.google.common.base.Splitter
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import mu.KLogging
 import org.horiga.study.pad.config.MyApplicationProperties
+import org.horiga.study.pad.dto.Event
 import org.jsoup.Jsoup
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -28,7 +30,9 @@ open class EventFetcher(
 
     }
 
-    fun update(data: Map<String, Map<String, String>>) {}
+    fun update(data: List<Event>) {
+        logger.info { "Starting update!!" }
+    }
 }
 
 class FetchJob(
@@ -39,14 +43,41 @@ class FetchJob(
 
     override fun run() {
         logger.info { "Starting fetch new events!!" }
-        val doc = Jsoup.connect(properties.masterEndpoint).get()
-        val h4Elm = doc.select("div.article h4")
-        logger.info { "html .article h4 => " +
-                "element.size = ${h4Elm.size}, " +
-                "element.text() = ${h4Elm.text()}"  }
+
+        fetchEvents()
 
         // TODO
 
+    }
+
+    fun fetchEvents(): List<Event> {
+
+        val groups = listOf<String>("A", "B", "C", "D", "E")
+        val events = mutableListOf<Event>()
+
+        val doc = Jsoup.connect(properties.masterEndpoint).get()
+        val eventDay = doc.select("div.article p").first()
+
+        logger.info { "[div.article p] event.day = ${eventDay.text()}" }
+
+        val titles = doc.select("div.article h4")
+        for (i in 0..titles.size - 1) {
+            val element = titles[i]
+            logger.info { "element($i).text = ${element.text()}" }
+        }
+
+        for (i in 0..titles.size - 1 ) {
+            val tbody = doc.select("div.article tbody")[i]
+            val tr = tbody.children().select("tr")
+            for (j in 0..tr.size-1) {
+                logger.info { "tr($j) text = ${tr[j].text()}" }
+                val times = mutableListOf<String>()
+                times.addAll(Splitter.on(" ").splitToList(tr[j].text()))
+                times.mapIndexedTo(events) { index, t -> Event(titles[i].text(), groups[index], listOf(t)) }
+            }
+        }
+
+        return events
     }
 }
 
