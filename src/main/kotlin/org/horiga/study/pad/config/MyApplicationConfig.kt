@@ -46,9 +46,11 @@ open class MyApplicationConfig(val properties: MyApplicationProperties) {
                 .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
                 .build()
 
-    @Bean
+    @Bean(destroyMethod = "shutdown")
     fun noticeService(): NoticeService {
-        return NoticeService(properties, okHttpClient())
+        val noticeService = NoticeService(properties, okHttpClient())
+        noticeService.start()
+        return noticeService
     }
 
     @Bean(destroyMethod = "shutdown")
