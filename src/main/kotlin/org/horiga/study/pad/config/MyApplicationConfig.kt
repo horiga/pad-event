@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import jetbrains.exodus.env.Environments
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.horiga.study.pad.repository.EventRepository
@@ -21,7 +20,9 @@ import java.util.concurrent.TimeUnit
 
 @EnableConfigurationProperties(MyApplicationProperties::class)
 @Configuration
-open class MyApplicationConfig(val properties: MyApplicationProperties) {
+open class MyApplicationConfig(
+        val properties: MyApplicationProperties,
+        val eventRepository: EventRepository) {
 
     @Bean
     @Primary
@@ -38,30 +39,25 @@ open class MyApplicationConfig(val properties: MyApplicationProperties) {
     }
 
     @Bean
-    fun okHttpClient() : OkHttpClient =
-        OkHttpClient.Builder()
-                .connectTimeout(properties.http.connectTimeoutMillis.toLong(), TimeUnit.MILLISECONDS)
-                .readTimeout(properties.http.readTimeoutMillis.toLong(), TimeUnit.MILLISECONDS)
-                .followRedirects(true)
-                .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
-                .build()
+    fun okHttpClient(): OkHttpClient =
+            OkHttpClient.Builder()
+                    .connectTimeout(properties.http.connectTimeoutMillis.toLong(), TimeUnit.MILLISECONDS)
+                    .readTimeout(properties.http.readTimeoutMillis.toLong(), TimeUnit.MILLISECONDS)
+                    .followRedirects(true)
+                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                    .build()
 
     @Bean(destroyMethod = "shutdown")
     fun noticeService(): NoticeService {
-        val noticeService = NoticeService(properties, okHttpClient())
+        val noticeService = NoticeService(properties, okHttpClient(), eventRepository)
         noticeService.start()
         return noticeService
     }
 
     @Bean(destroyMethod = "shutdown")
     fun eventFetcher(): EventFetcher {
-        val eventFetcher = EventFetcher(properties)
+        val eventFetcher = EventFetcher(properties, eventRepository)
         eventFetcher.start()
         return eventFetcher
-    }
-
-    @Bean(destroyMethod = "shutdown")
-    fun eventRepository() : EventRepository {
-        return EventRepository(Environments.newInstance(properties.dbPath))
     }
 }

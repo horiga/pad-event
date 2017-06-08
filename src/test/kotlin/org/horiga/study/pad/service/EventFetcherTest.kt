@@ -18,16 +18,11 @@ class EventFetcherTest {
     @Autowired lateinit var eventFetcher: EventFetcher
     @Autowired lateinit var properties: MyApplicationProperties
 
-    @Test fun runTest() {
-        logger.info { "runTest" }
-        val data = listOf<Event>()
-        eventFetcher.update(data)
-    }
-
     @Test fun fetchTest() {
         val job = FetchJob(eventFetcher, properties)
-        val events = job.fetchEvents()
-        for (e in events) {
+        val dayEvent = job.fetchDayEvent()
+        logger.info { "day=${dayEvent.message}" }
+        for (e in dayEvent.events) {
             logger.info { "event = $e" }
         }
     }

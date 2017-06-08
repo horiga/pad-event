@@ -1,10 +1,18 @@
 package org.horiga.study.pad.repository
 
-import jetbrains.exodus.env.Environment
+import mu.KLogging
 import org.horiga.study.pad.dto.Event
+import org.springframework.stereotype.Repository
 
-open class EventRepository(
-        val env: Environment // TODO: change to persistent
-) {
-    var events : List<Event> = listOf()
+@Repository
+open class EventRepository {
+
+    companion object: KLogging()
+
+    var event: Event? = null
+    fun setUp(event: Event) {
+        logger.info { "setUp events" }
+        this.event = event
+    }
+
 }
